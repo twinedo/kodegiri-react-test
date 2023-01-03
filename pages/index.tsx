@@ -9,6 +9,7 @@ import {useAppDispatch, useAppSelector} from 'services/redux/hooks'
 import { PhotoState, reducerPhoto } from 'services/redux/reducers/photos'
 import { getSearchPhotos } from 'services/helpers/photosHandler'
 import FlatList from 'flatlist-react';
+import { IListPhotos } from 'services/models/photo_list_model'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -63,17 +64,7 @@ export default function Home() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const [items, setItems] = useState<PhotoState>({
-    description: '',
-    urls: '',
-    user: {
-      name: '',
-      username: '',
-      profile_image: '',
-    },
-    likes: 0,
-    alt_description: 'string',
-  });
+  const [items, setItems] = useState<IListPhotos>();
 
   const onItemClick = (item: any) => {
     console.log(item);
@@ -95,10 +86,10 @@ export default function Home() {
     );
   };
 
-  const renderItem = ({item}: any) =>
+  const renderItem = (item: IListPhotos) =>
     (
-      <Box onClick={() => onItemClick(item)}>
-        <Image src={item?.urls?.thumb} height={50} width={50} alt="image.png" />
+      <Box onClick={() => onItemClick(item)} key={item.id}>
+        <Image src={item?.urls?.thumb!} height={50} width={50} alt="image.png" />
       </Box>
     );
 
@@ -156,7 +147,8 @@ export default function Home() {
 
           <div className={styles.grid}>
           <FlatList
-            list={list?.results}
+              list={list?.results}
+
             keyExtractor={(item: any) => item?.id}
             horizontal={false}
             numColumns={2}
