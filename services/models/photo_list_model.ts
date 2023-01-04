@@ -24,6 +24,7 @@ export interface IListPhotos {
   sponsorship?: Sponsorship | null;
   topic_submissions?: TopicSubmissions;
   user?: User;
+  tags?: any;
 }
 
 export interface IPhotoLinks {

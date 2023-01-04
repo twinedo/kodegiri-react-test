@@ -1,19 +1,14 @@
 import Head from 'next/head'
-// import Image from 'next/image'
-import { Inter } from '@next/font/google'
 import styles from '../styles/Home.module.css'
 import { Box, Button, HStack, Image, Input, InputGroup, InputLeftAddon, InputRightAddon, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalOverlay, SimpleGrid, Stack, Text, useDisclosure } from '@chakra-ui/react'
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useState } from 'react'
-import {useAppDispatch, useAppSelector} from 'services/redux/hooks'
-import { PhotoState, reducerPhoto } from 'services/redux/reducers/photos'
+import {useAppDispatch} from 'services/redux/hooks'
+import { reducerPhoto } from 'services/redux/reducers/photos'
 import { getSearchPhotos } from 'services/helpers/photosHandler'
 import FlatList from 'flatlist-react';
 import { IListPhotos } from 'services/models/photo_list_model'
-import { StaggeredGrid, StaggeredGridItem } from 'react-staggered-grid'
 import Link from 'next/link';
-
-const inter = Inter({ subsets: ['latin'] })
 
 interface listProps {
   results: Array<any>;
@@ -23,8 +18,6 @@ interface listProps {
 
 export default function Home() {
   const dispatch = useAppDispatch();
-  const photos = useAppSelector(state => state.photos);
-
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [searchText, setSearchText] = useState('');
@@ -56,7 +49,6 @@ export default function Home() {
           total_pages: response.total_pages,
         });
       }
-      console.log('response', response);
       setIsLoading(false);
       return response;
     } catch (error) {
@@ -66,13 +58,10 @@ export default function Home() {
     }
   };
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   const [items, setItems] = useState<IListPhotos>();
 
   const onItemClick = (item: IListPhotos) => {
     console.log(item);
-    setIsModalVisible(true);
     setItems(item);
     onOpen();
 
@@ -116,13 +105,13 @@ export default function Home() {
     ) : null;
   };
 
-  const renderEmpty = () => {
-    return (
+  const renderEmpty = () =>
+    (
       <Box>
         <Text fontWeight="bold" color="black">No Images</Text>
       </Box>
     );
-  };
+
 
   const loadMoreItem = () => {
     if (currentPage < list.total_pages) {
@@ -161,57 +150,53 @@ export default function Home() {
           <Text align="center" color="black">Click `Search` to find the results</Text>
 
           <SimpleGrid columns={[1, 2, 3]} spacing={10}>
-          <FlatList
-            list={list?.results}
-            keyExtractor={(item: any) => item?.id}
-            horizontal={false}
-            numColumns={2}
-            ListEmptyComponent={renderEmpty}
-            ListFooterComponent={renderLoader}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-            onEndReached={() => list.results.length > 5 && loadMoreItem()}
-            onEndReachedThreshold={0.3}
-          />
+            <FlatList
+              list={list?.results}
+              keyExtractor={(item: any) => item?.id}
+              horizontal={false}
+              numColumns={2}
+              ListEmptyComponent={renderEmpty}
+              ListFooterComponent={renderLoader}
+              showsVerticalScrollIndicator={false}
+              renderItem={renderItem}
+              onEndReached={() => list.results.length > 5 && loadMoreItem()}
+              onEndReachedThreshold={0.3}
+            />
           </SimpleGrid>
 
           <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
+            <ModalOverlay />
+              <ModalContent>
+                <ModalBody>
+                  <Stack>
+                    <Box key={items?.id} borderRadius={20}>
+                      <Image
+                        src={items?.urls?.thumb}
+                        alt="image.png"
+                        width="100%"
+                        height="100%"
+                        objectFit="cover"
+                        borderRadius={10}
+                      />
+                    </Box>
+                    <HStack justify="space-between">
+                      <Text>{items?.user?.name}</Text>
+                      <Text>Likes: {items?.likes}</Text>
+                    </HStack>
+                  </Stack>
+                </ModalBody>
 
-              <ModalBody>
-                <Stack>
-
-          <Box key={items?.id} borderRadius={20}>
-            <Image
-              src={items?.urls?.thumb}
-              alt="image.png"
-              width="100%"
-              height="100%"
-              objectFit="cover"
-              borderRadius={10}
-              />
-                  </Box>
-                  <HStack justify="space-between">
-
-                  <Text>{items?.user?.name}</Text>
-                  <Text>Likes: {items?.likes}</Text>
-                  </HStack>
-                </Stack>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button colorScheme='blue' mr={3} onClick={onClose}>
-              Close
-                </Button>
-                <Link href={{query: items , pathname: "/detail"}}>
-            <Button variant='ghost' >Detail</Button>
-                </Link>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-          </Stack>
+                <ModalFooter>
+                  <Button colorScheme='blue' mr={3} onClick={onClose}>
+                    Close
+                      </Button>
+                      <Link href={{query: {id: items?.id} , pathname: "/detail"}}>
+                  <Button variant='ghost' >Detail</Button>
+                      </Link>
+                </ModalFooter>
+              </ModalContent>
+          </Modal>
+        </Stack>
       </main>
     </>
   )
