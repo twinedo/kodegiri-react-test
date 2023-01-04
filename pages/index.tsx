@@ -37,9 +37,9 @@ export default function Home() {
   window.onscroll = () => {
     if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
       if(!noData) {
+        getPhotos(page);
+        list.results.length > 5 && loadMoreItem()
       }
-      getPhotos(page);
-      list.results.length > 5 && loadMoreItem()
     }
   }
 
