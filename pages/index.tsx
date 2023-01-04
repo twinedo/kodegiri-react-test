@@ -52,7 +52,7 @@ export default function Home() {
       setIsLoading(false);
       return response;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       setIsLoading(false);
       return error;
     }
@@ -61,7 +61,7 @@ export default function Home() {
   const [items, setItems] = useState<IListPhotos>();
 
   const onItemClick = (item: IListPhotos) => {
-    console.log(item);
+    // console.log(item);
     setItems(item);
     onOpen();
 
@@ -119,9 +119,6 @@ export default function Home() {
       getPhotos(currentPage + 1);
     }
   };
-
-  console.log('listtst', list);
-
   return (
     <>
       <Head>
