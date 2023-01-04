@@ -1,8 +1,8 @@
 import Head from 'next/head'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import styles from '../styles/Home.module.css'
-import { Box, Button, Input, InputGroup, InputLeftAddon, InputRightAddon, Stack, Text } from '@chakra-ui/react'
+import { Box, Button, HStack, Image, Input, InputGroup, InputLeftAddon, InputRightAddon, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalOverlay, SimpleGrid, Stack, Text, useDisclosure } from '@chakra-ui/react'
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useState } from 'react'
 import {useAppDispatch, useAppSelector} from 'services/redux/hooks'
@@ -10,6 +10,8 @@ import { PhotoState, reducerPhoto } from 'services/redux/reducers/photos'
 import { getSearchPhotos } from 'services/helpers/photosHandler'
 import FlatList from 'flatlist-react';
 import { IListPhotos } from 'services/models/photo_list_model'
+import { StaggeredGrid, StaggeredGridItem } from 'react-staggered-grid'
+import Link from 'next/link';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +24,8 @@ interface listProps {
 export default function Home() {
   const dispatch = useAppDispatch();
   const photos = useAppSelector(state => state.photos);
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [searchText, setSearchText] = useState('');
 
@@ -66,21 +70,24 @@ export default function Home() {
 
   const [items, setItems] = useState<IListPhotos>();
 
-  const onItemClick = (item: any) => {
+  const onItemClick = (item: IListPhotos) => {
     console.log(item);
     setIsModalVisible(true);
     setItems(item);
+    onOpen();
 
     dispatch(
       reducerPhoto({
+
+        id: item.id,
         alt_description: item.alt_description,
         description: item.description,
         likes: item.likes,
-        urls: item.urls.full,
+        urls: item?.urls,
         user: {
-          name: item.user.name,
-          profile_image: item.user.profile_image.medium,
-          username: item.user.username,
+          name: item?.user?.name,
+          profile_image: item?.user?.profile_image?.medium,
+          username: item?.user?.username,
         },
       }),
     );
@@ -88,8 +95,15 @@ export default function Home() {
 
   const renderItem = (item: IListPhotos) =>
     (
-      <Box onClick={() => onItemClick(item)} key={item.id}>
-        <Image src={item?.urls?.thumb!} height={50} width={50} alt="image.png" />
+    <Box onClick={() => onItemClick(item)} key={item.id} borderRadius={20}>
+      <Image
+        src={item?.urls?.thumb}
+        alt="image.png"
+        width="100%"
+        height="100%"
+        objectFit="cover"
+        borderRadius={20}
+        _hover={{ boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px', cursor: 'pointer' }} />
       </Box>
     );
 
@@ -130,7 +144,7 @@ export default function Home() {
       <main className={styles.main}>
 
         <Stack>
-
+          <Text align="center" fontWeight="bold" fontSize={30}>UNSPLASH</Text>
           <InputGroup>
             <InputLeftAddon>
               <AiOutlineSearch size={30} color="black" />
@@ -144,11 +158,11 @@ export default function Home() {
               <Text fontWeight="bold" color="black">Search</Text>
             </InputRightAddon>
           </InputGroup>
+          <Text align="center" color="black">Click `Search` to find the results</Text>
 
-          <div className={styles.grid}>
+          <SimpleGrid columns={[1, 2, 3]} spacing={10}>
           <FlatList
-              list={list?.results}
-
+            list={list?.results}
             keyExtractor={(item: any) => item?.id}
             horizontal={false}
             numColumns={2}
@@ -158,65 +172,45 @@ export default function Home() {
             renderItem={renderItem}
             onEndReached={() => list.results.length > 5 && loadMoreItem()}
             onEndReachedThreshold={0.3}
-            contentContainerStyle={styles.fg1}
           />
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
+          </SimpleGrid>
 
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
+          <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
 
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
+              <ModalBody>
+                <Stack>
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-          </div>
+          <Box key={items?.id} borderRadius={20}>
+            <Image
+              src={items?.urls?.thumb}
+              alt="image.png"
+              width="100%"
+              height="100%"
+              objectFit="cover"
+              borderRadius={10}
+              />
+                  </Box>
+                  <HStack justify="space-between">
+
+                  <Text>{items?.user?.name}</Text>
+                  <Text>Likes: {items?.likes}</Text>
+                  </HStack>
+                </Stack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={onClose}>
+              Close
+                </Button>
+                <Link href={{query: items , pathname: "/detail"}}>
+            <Button variant='ghost' >Detail</Button>
+                </Link>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
           </Stack>
       </main>
     </>

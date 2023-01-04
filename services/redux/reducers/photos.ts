@@ -1,4 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
+import { IListPhotos } from 'services/models/photo_list_model';
 
 export interface UserProps {
   name: string;
@@ -14,16 +15,23 @@ export interface PhotoState {
   alt_description: string;
 }
 
-const initialState: PhotoState = {
+const initialState: IListPhotos = {
   description: '',
-  urls: '',
+  urls: {
+    raw: '',
+    full: '',
+    thumb: '',
+    regular: '',
+    small: '',
+    small_s3: '',
+  },
   user: {
     name: '',
     username: '',
-    profile_image: '',
+    profile_image: {small: '', large: '', medium: ''},
   },
   likes: 0,
-  alt_description: '',
+  alt_description: null,
 };
 
 export const photoReducer = createSlice({
